@@ -2,56 +2,35 @@ import Image from "next/image";
 
 export default function TrustedCompanies() {
   const companies = [
-    { name: "Nomad", icon: "/assets/logos/nomad.png", width: 153, height: 40 },
-    {
-      name: "Netlify",
-      icon: "/assets/logos/netlify.png",
-      width: 116,
-      height: 28,
-    },
-    {
-      name: "Dropbox",
-      icon: "/assets/logos/dropbox.png",
-      width: 182,
-      height: 24,
-    },
-    {
-      name: "GoDaddy",
-      icon: "/assets/logos/godaddy.png",
-      width: 108,
-      height: 32,
-    },
-    {
-      name: "Twitter",
-      icon: "/assets/logos/twitter.png",
-      width: 82,
-      height: 32,
-    },
+    { name: "Talkit", icon: "/company/talkit 1.png", width: 154, height: 40 },
+    { name: "AMD", icon: "/company/amd-logo-1.png", width: 82, height: 32 },
+    { name: "Vodafone", icon: "/company/vodafone-2017-logo.svg", width: 183, height: 24 },
+    { name: "Tesla", icon: "/company/tesla-9 1.png", width: 116, height: 28 },
+    { name: "Intel", icon: "/company/intel-3.png", width: 108, height: 32 },
   ];
 
   return (
-    <section className="w-full py-12 px-6 md:px-[124px] bg-white border-b border-brand-border/50 overflow-hidden">
-      <div className="container mx-auto flex flex-col lg:flex-row items-center justify-between gap-10">
-        <p className="text-lg text-brand-dark/50 font-epilogue whitespace-nowrap text-center lg:text-left">
+    <section className="w-full py-12 px-6 md:px-[124px] bg-white overflow-hidden">
+      <div className="container mx-auto flex flex-col justify-start items-start gap-8">
+        <div className="opacity-50 text-[#202430] text-[18px] font-epilogue font-normal leading-[28.80px] break-words">
           Companies we helped grow
-        </p>
-        <div className="relative flex-1 overflow-hidden">
-          <div className="flex items-center gap-10 md:gap-16 animate-marquee w-max">
-            {[...companies, ...companies].map((company, index) => (
-              <div
-                key={index}
-                className="relative grayscale hover:grayscale-0 opacity-40 hover:opacity-100 transition-all cursor-pointer duration-300 transform hover:scale-105 shrink-0"
-              >
-                <Image
-                  src={company.icon}
-                  alt={company.name}
-                  width={company.width}
-                  height={company.height}
-                  className="object-contain max-h-[40px] w-auto"
-                />
-              </div>
-            ))}
-          </div>
+        </div>
+        <div className="self-stretch flex justify-between items-center flex-wrap gap-8">
+          {companies.map((company, index) => (
+            <div
+              key={index}
+              className="relative opacity-30 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center shrink-0"
+              style={{ width: company.width, height: company.height }}
+            >
+              <Image
+                src={company.icon}
+                alt={company.name}
+                width={company.width}
+                height={company.height}
+                className="object-contain"
+              />
+            </div>
+          ))}
         </div>
       </div>
     </section>

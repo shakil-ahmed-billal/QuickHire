@@ -118,7 +118,7 @@ var CookieUtils = {
     res.cookie(name, value, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge
     });
   },
@@ -126,7 +126,7 @@ var CookieUtils = {
     res.clearCookie(name, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax"
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
     });
   }
 };
@@ -929,6 +929,7 @@ var IndexRoutes = router5;
 // src/app.ts
 import morgan from "morgan";
 var app = express();
+app.set("trust proxy", 1);
 app.use(
   cors({
     origin: [envVars.FRONTEND_URL, "http://localhost:3000"],
