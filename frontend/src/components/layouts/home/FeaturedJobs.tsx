@@ -127,7 +127,7 @@ export default function FeaturedJobs() {
                 </h3>
                 <div className="flex items-center gap-2 text-brand-gray text-sm">
                   <span>{job.company}</span>
-                  <span className="w-1.5 h-1.5 bg-brand-gray/20 rounded-full"></span>
+                  <span className="w-1.5 h-1.5 bg-brand-gray/20 "></span>
                   <span>{job.location}</span>
                 </div>
               </div>
@@ -140,7 +140,7 @@ export default function FeaturedJobs() {
                 {job.tags.map((tag, tIndex) => (
                   <span
                     key={tIndex}
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    className={`px-3 py-1  text-xs font-semibold ${
                       tag === "Marketing"
                         ? "bg-orange-50 text-orange-500"
                         : tag === "Design"

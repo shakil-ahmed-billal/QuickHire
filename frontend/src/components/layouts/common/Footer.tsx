@@ -6,10 +6,10 @@ export default function Footer() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
         <div className="space-y-6">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center relative overflow-hidden">
+            <div className="w-8 h-8 bg-primary  flex items-center justify-center relative overflow-hidden">
               {/* Same Logo as Navbar */}
               <div className="w-[18px] h-1.5 border-[3px] border-white rounded-[0.5px]"></div>
-              <div className="absolute w-5 h-5 border-2 border-white rounded-full translate-y-1 -rotate-90"></div>
+              <div className="absolute w-5 h-5 border-2 border-white  translate-y-1 -rotate-90"></div>
             </div>
             <span className="text-2xl font-bold font-red-hat">QuickHire</span>
           </div>

@@ -135,14 +135,14 @@ export default function LatestJobs() {
                 </h3>
                 <div className="flex items-center gap-2 text-brand-gray">
                   <span>{job.company}</span>
-                  <span className="w-1.5 h-1.5 bg-brand-gray/20 rounded-full"></span>
+                  <span className="w-1.5 h-1.5 bg-brand-gray/20 "></span>
                   <span>{job.location}</span>
                 </div>
                 <div className="flex gap-2 mt-2">
                   {job.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className={`px-3 py-1 text-sm font-semibold rounded-full ${
+                      className={`px-3 py-1 text-sm font-semibold  ${
                         tag === "Full-Time"
                           ? "bg-green-50 text-[#56CDAD]"
                           : tag === "Marketing"

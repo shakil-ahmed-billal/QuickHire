@@ -1,16 +1,88 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  ADMIN
+  JOB_SEEKER
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  REMOTE
+  INTERNSHIP
+  CONTRACT
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWED
+  SHORTLISTED
+  REJECTED
+}
+
 model User {
-    id        String   @id @default(uuid())
-    email     String   @unique
-    name      String?
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(JOB_SEEKER)
+  isDeleted    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  jobPosts     JobPost[]
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  icon      String?
+  createdAt DateTime  @default(now())
+
+  jobPosts  JobPost[]
+}
+
+model JobPost {
+  id           String    @id @default(cuid())
+  title        String
+  company      String
+  companyLogo  String?
+  location     String
+  type         JobType   @default(FULL_TIME)
+  salary       String?
+  description  String
+  requirements String?
+  deadline     DateTime?
+  isDeleted    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  categoryId   String
+  category     Category  @relation(fields: [categoryId], references: [id])
+
+  postedById   String
+  postedBy     User      @relation(fields: [postedById], references: [id])
+
+  applications Application[]
+}
+
+model Application {
+  id             String            @id @default(cuid())
+  applicantName  String
+  applicantEmail String
+  resumeUrl      String?
+  coverNote      String?
+  status         ApplicationStatus @default(PENDING)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  jobId          String
+  job            JobPost           @relation(fields: [jobId], references: [id], onDelete: Cascade)
 }
