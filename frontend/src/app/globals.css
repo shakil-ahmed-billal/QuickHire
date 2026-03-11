@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #4640de;
+  --color-secondary: #26a4ff;
+  --color-brand-dark: #25324b;
+  --color-brand-gray: #515b6f;
+  --color-brand-light: #f8f8fd;
+  --color-brand-border: #d6ddeb;
+
+  --font-epilogue: var(--font-epilogue);
+  --font-red-hat: var(--font-red-hat-display);
+  --font-inter: var(--font-inter);
+  --font-clash: "Clash Display", var(--font-epilogue), sans-serif;
+
+  --animate-marquee: scroll-marquee 30s linear infinite;
+
+  @keyframes scroll-marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #25324b;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-epilogue);
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-clash {
+  font-family: var(--font-clash);
+}
