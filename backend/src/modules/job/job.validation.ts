@@ -9,6 +9,8 @@ export const createJobZodSchema = z.object({
   salary: z.string().optional(),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   requirements: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  isFeatured: z.boolean().optional(),
   deadline: z.string().optional(),
   categoryId: z.string().min(1, 'Category is required'),
 });

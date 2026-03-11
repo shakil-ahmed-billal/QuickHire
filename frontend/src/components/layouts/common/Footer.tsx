@@ -2,9 +2,9 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-[#202430] py-20 px-8 md:px-[124px] text-white">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
-        <div className="space-y-6">
+    <footer className="w-full bg-[#202430] py-20 px-6 md:px-[124px] text-white">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
+        <div className="space-y-6 text-center sm:text-left">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-primary  flex items-center justify-center relative overflow-hidden">
               {/* Same Logo as Navbar */}

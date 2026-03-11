@@ -32,7 +32,7 @@ export default function TrustedCompanies() {
   return (
     <section className="w-full py-12 px-6 md:px-[124px] bg-white border-b border-brand-border/50 overflow-hidden">
       <div className="container mx-auto flex flex-col lg:flex-row items-center justify-between gap-10">
-        <p className="text-lg text-brand-dark/50 font-epilogue whitespace-nowrap">
+        <p className="text-lg text-brand-dark/50 font-epilogue whitespace-nowrap text-center lg:text-left">
           Companies we helped grow
         </p>
         <div className="relative flex-1 overflow-hidden">

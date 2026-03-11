@@ -6,7 +6,7 @@ import api from '@/lib/axios';
 import { Job, JobCard } from '@/components/JobCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Loader2 } from 'lucide-react';
+import { Search, Loader2, MapPin } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export function JobsPage() {
@@ -53,6 +53,13 @@ export function JobsPage() {
   };
 
   useEffect(() => {
+    // Sync states with URL params when they change (e.g. navigating from home)
+    setSearch(searchParams.get('search') || '');
+    setCategory(searchParams.get('category') || 'all');
+    setType(searchParams.get('type') || 'all');
+  }, [searchParams]);
+
+  useEffect(() => {
     fetchJobs();
   }, [category, type, searchParams]);
 
@@ -68,54 +75,75 @@ export function JobsPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="mb-8 bg-muted/30 p-6  border">
-        <h1 className="text-3xl font-bold mb-6">Find Your Next Job</h1>
-        
-        <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input 
-              placeholder="Search by title or company..." 
-              className="pl-10 h-12 text-base bg-background"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+    <div className="w-full py-20 px-6 md:px-[124px] bg-white min-h-screen">
+      <div className="container mx-auto">
+        <div className="mb-16">
+          <div className="max-w-2xl mb-10">
+            <h1 className="text-4xl md:text-6xl font-clash font-semibold text-brand-dark mb-6">
+              Find Your <span className="text-secondary text-primary">dream job</span>
+            </h1>
+            <p className="text-lg text-brand-gray">
+              Browse through thousands of job openings from top companies and find the perfect match for your career.
+            </p>
           </div>
           
-          <div className="flex gap-4 w-full md:w-auto">
-            <Select value={category} onValueChange={(val) => setCategory(val || 'all')}>
-              <SelectTrigger className="w-full md:w-[200px] h-12 bg-background">
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map(cat => (
-                  <SelectItem key={cat.slug} value={cat.slug}>{cat.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="bg-white border border-brand-border p-3 md:p-4 shadow-[0px_24px_48px_rgba(0,0,0,0.04)]">
+            <form onSubmit={handleSearch} className="flex flex-col xl:flex-row items-stretch xl:items-center xl:divide-x divide-brand-border gap-4 xl:gap-0">
+              {/* Search Title */}
+              <div className="relative flex-[1.5] w-full group">
+                <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
+                <Input 
+                  placeholder="Job title or keyword" 
+                  className="pl-16 h-16 md:h-20 text-xl border-none focus-visible:ring-0 rounded-none font-medium placeholder:text-brand-gray/60"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+              
+              {/* Category Filter */}
+              <div className="relative flex-1 w-full flex items-center group border-t xl:border-t-0 border-brand-border">
+                <div className="absolute left-6 z-10">
+                  <MapPin className="h-6 w-6 text-primary" />
+                </div>
+                <Select value={category} onValueChange={(val) => setCategory(val || 'all')}>
+                  <SelectTrigger className="pl-16 h-16 md:h-20 text-xl border-none focus:ring-0 rounded-none font-medium text-brand-dark">
+                    <SelectValue placeholder="All Categories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map(cat => (
+                      <SelectItem key={cat.slug} value={cat.slug}>{cat.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <Select value={type} onValueChange={(val) => setType(val || 'all')}>
-              <SelectTrigger className="w-full md:w-[160px] h-12 bg-background">
-                <SelectValue placeholder="Job Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="FULL_TIME">Full Time</SelectItem>
-                <SelectItem value="PART_TIME">Part Time</SelectItem>
-                <SelectItem value="REMOTE">Remote</SelectItem>
-                <SelectItem value="INTERNSHIP">Internship</SelectItem>
-                <SelectItem value="CONTRACT">Contract</SelectItem>
-              </SelectContent>
-            </Select>
+              {/* Job Type Filter */}
+              <div className="relative flex-1 w-full border-t xl:border-t-0 border-brand-border">
+                <Select value={type} onValueChange={(val) => setType(val || 'all')}>
+                  <SelectTrigger className="px-6 h-16 md:h-20 text-xl border-none focus:ring-0 rounded-none font-medium text-brand-dark">
+                    <SelectValue placeholder="Job Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="FULL_TIME">Full Time</SelectItem>
+                    <SelectItem value="PART_TIME">Part Time</SelectItem>
+                    <SelectItem value="REMOTE">Remote</SelectItem>
+                    <SelectItem value="INTERNSHIP">Internship</SelectItem>
+                    <SelectItem value="CONTRACT">Contract</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <Button type="submit" size="lg" className="h-12 w-full md:w-auto">
-              Search
-            </Button>
+              {/* Search Button */}
+              <div className="w-full xl:w-auto p-1 border-t xl:border-t-0 border-brand-border">
+                <Button type="submit" size="lg" className="h-16 md:h-20 w-full xl:px-12 text-xl font-bold rounded-none shadow-lg shadow-primary/20">
+                  Search
+                </Button>
+              </div>
+            </form>
           </div>
-        </form>
-      </div>
+        </div>
 
       <div className="mb-6">
         <h2 className="text-xl font-semibold">
@@ -141,6 +169,7 @@ export function JobsPage() {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

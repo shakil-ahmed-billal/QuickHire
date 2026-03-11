@@ -1,144 +1,266 @@
-import 'dotenv/config';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../src/lib/prisma';
 import bcrypt from 'bcrypt';
+import { cloudinary } from '../src/config/cloudinary';
+import path from 'path';
+import fs from 'fs';
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
-const prisma = new PrismaClient({ adapter });
+async function uploadToCloudinary(filePath: string, folder: string) {
+  try {
+    const result = await cloudinary.uploader.upload(filePath, {
+      folder: `quickhire/${folder}`,
+    });
+    return result.secure_url;
+  } catch (error) {
+    console.error(`Error uploading ${filePath} to Cloudinary:`, error);
+    return null;
+  }
+}
 
 async function main() {
-  console.log('🌱 Starting database seeding...');
+  console.log('Clearing existing data...');
+  await prisma.application.deleteMany();
+  await prisma.jobPost.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.user.deleteMany();
 
-  // Create Admin user
-  const adminPassword = await bcrypt.hash('Admin@123', 10);
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@quickhire.com' },
-    update: {},
-    create: {
-      name: 'QuickHire Admin',
+  const passwordHash = await bcrypt.hash('password123', 10);
+  const adminUser = await prisma.user.create({
+    data: {
+      name: 'Admin Start',
       email: 'admin@quickhire.com',
-      passwordHash: adminPassword,
+      passwordHash,
       role: 'ADMIN',
     },
   });
-  console.log('✅ Admin user created:', admin.email);
 
-  // Create Categories
-  const categories = [
-    { name: 'Engineering', slug: 'engineering', icon: '⚙️' },
-    { name: 'Design', slug: 'design', icon: '🎨' },
-    { name: 'Marketing', slug: 'marketing', icon: '📢' },
-    { name: 'Finance', slug: 'finance', icon: '💰' },
-    { name: 'Healthcare', slug: 'healthcare', icon: '🏥' },
-    { name: 'Education', slug: 'education', icon: '📚' },
-    { name: 'Sales', slug: 'sales', icon: '💼' },
-    { name: 'Customer Service', slug: 'customer-service', icon: '🎧' },
-    { name: 'Data Science', slug: 'data-science', icon: '📊' },
-    { name: 'Product', slug: 'product', icon: '🚀' },
+  const categoryNames = [
+    'Design',
+    'Sales',
+    'Marketing',
+    'Finance',
+    'Technology',
+    'Engineering',
+    'Business',
+    'Human Resource',
   ];
 
-  const createdCategories: Record<string, string> = {};
-  for (const cat of categories) {
-    const created = await prisma.category.upsert({
-      where: { slug: cat.slug },
-      update: {},
-      create: cat,
+  // Placeholder SVGs to be used if Cloudinary upload fails or for structure
+  const categoryIconsMap: Record<string, string> = {
+    'Design': 'Design',
+    'Sales': 'Sales',
+    'Marketing': 'Marketing',
+    'Finance': 'Finance',
+    'Technology': 'Technology',
+    'Engineering': 'Engineering',
+    'Business': 'Business',
+    'Human Resource': 'Human Resource',
+  };
+
+  console.log('Seeding categories...');
+  const categoriesMap: Record<string, any> = {};
+  for (const name of categoryNames) {
+    const slug = name.toLowerCase().replace(' ', '-');
+    const category = await prisma.category.create({
+      data: {
+        name,
+        slug,
+        icon: categoryIconsMap[name],
+      },
     });
-    createdCategories[cat.slug] = created.id;
+    categoriesMap[name] = category;
   }
-  console.log('✅ Categories created:', categories.length);
 
-  // Create Sample Jobs
-  const jobs = [
+  const logosDir = path.join(process.cwd(), '../frontend/public/assets/logos');
+  const getLogoPath = (logoName: string) => path.join(logosDir, logoName);
+
+  const featuredJobsData = [
     {
-      title: 'Senior Frontend Developer',
-      company: 'TechVision Ltd',
-      location: 'Dhaka, Bangladesh',
-      type: 'FULL_TIME' as const,
-      salary: 'BDT 80,000 - 120,000/month',
-      description: 'We are looking for an experienced Frontend Developer proficient in React, TypeScript, and modern CSS frameworks. You will build stunning user interfaces and collaborate with our product team.',
-      requirements: '• 3+ years of React experience\n• TypeScript proficiency\n• Experience with Next.js\n• Strong CSS/Tailwind skills',
-      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      categoryId: createdCategories['engineering'],
-      postedById: admin.id,
+      company: 'Revolut',
+      logoFile: 'revolut.png',
+      title: 'Email Marketing',
+      location: 'Madrid, Spain',
+      type: 'FULL_TIME',
+      salary: '$30k-40k',
+      description: 'Revolut is looking for Email Marketing to help team ma ...',
+      tags: ['Marketing', 'Design'],
+      isFeatured: true,
+      categoryName: 'Marketing',
     },
     {
-      title: 'UI/UX Designer',
-      company: 'Creative Studios',
-      location: 'Remote',
-      type: 'REMOTE' as const,
-      salary: 'BDT 60,000 - 90,000/month',
-      description: 'Join our design team to create beautiful, intuitive user experiences for our growing SaaS platform. You will own the design process from wireframes to final pixel-perfect mockups.',
-      requirements: '• Proficiency in Figma\n• Strong portfolio\n• UX research skills\n• Motion design is a plus',
-      deadline: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000),
-      categoryId: createdCategories['design'],
-      postedById: admin.id,
+      company: 'Dropbox',
+      logoFile: 'dropbox.png',
+      title: 'Brand Designer',
+      location: 'San Fransisco, US',
+      type: 'FULL_TIME',
+      salary: '$50k-70k',
+      description: 'Dropbox is looking for Brand Designer to help the team t ...',
+      tags: ['Design', 'Business'],
+      isFeatured: true,
+      categoryName: 'Design',
     },
     {
-      title: 'Digital Marketing Manager',
-      company: 'GrowthHack Agency',
-      location: 'Chittagong, Bangladesh',
-      type: 'FULL_TIME' as const,
-      salary: 'BDT 50,000 - 80,000/month',
-      description: 'Lead our digital marketing campaigns across SEO, paid ads, and social media. Drive customer acquisition and growth for our clients.',
-      requirements: '• 4+ years digital marketing\n• Google Ads certified\n• SEO/SEM expertise\n• Analytics tools proficiency',
-      deadline: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000),
-      categoryId: createdCategories['marketing'],
-      postedById: admin.id,
+      company: 'Pitch',
+      logoFile: 'pitch.png',
+      title: 'Email Marketing',
+      location: 'Berlin, Germany',
+      type: 'FULL_TIME',
+      salary: '$40k-50k',
+      description: 'Pitch is looking for Customer Manager to join marketing t ...',
+      tags: ['Marketing'],
+      isFeatured: true,
+      categoryName: 'Marketing',
     },
     {
-      title: 'Backend Node.js Developer',
-      company: 'StartupHive',
-      location: 'Dhaka, Bangladesh',
-      type: 'FULL_TIME' as const,
-      salary: 'BDT 70,000 - 110,000/month',
-      description: 'Build and scale our backend APIs using Node.js, Express, and PostgreSQL. Work on exciting challenges in a fast-paced startup environment.',
-      requirements: '• Node.js & Express\n• PostgreSQL/Prisma\n• REST API design\n• Docker knowledge preferred',
-      deadline: new Date(Date.now() + 35 * 24 * 60 * 60 * 1000),
-      categoryId: createdCategories['engineering'],
-      postedById: admin.id,
+      company: 'Blinkist',
+      logoFile: 'blinkist.png',
+      title: 'Visual Designer',
+      location: 'Granada, Spain',
+      type: 'FULL_TIME',
+      salary: '$45k-60k',
+      description: 'Blinkist is looking for Visual Designer to help team desi ...',
+      tags: ['Design'],
+      isFeatured: true,
+      categoryName: 'Design',
     },
     {
-      title: 'Data Analyst',
-      company: 'DataMind Corp',
-      location: 'Remote',
-      type: 'PART_TIME' as const,
-      salary: 'BDT 40,000 - 60,000/month',
-      description: 'Analyze business data to derive actionable insights. Create dashboards and reports for leadership team.',
-      requirements: '• Python/SQL proficiency\n• Tableau or Power BI\n• Statistical analysis\n• Excel advanced skills',
-      deadline: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-      categoryId: createdCategories['data-science'],
-      postedById: admin.id,
+      company: 'ClassPass',
+      logoFile: 'classpass.png',
+      title: 'Product Designer',
+      location: 'Manchester, UK',
+      type: 'FULL_TIME',
+      salary: '$60k-80k',
+      description: 'ClassPass is looking for Product Designer to help us...',
+      tags: ['Marketing', 'Design'],
+      isFeatured: true,
+      categoryName: 'Design',
     },
     {
-      title: 'Product Manager',
-      company: 'Innova Tech',
-      location: 'Sylhet, Bangladesh',
-      type: 'FULL_TIME' as const,
-      salary: 'BDT 90,000 - 140,000/month',
-      description: 'Own the product roadmap and work with engineering and design teams to deliver world-class features. Drive strategy and execution.',
-      requirements: '• 3+ years PM experience\n• Agile/Scrum expertise\n• Strong analytical skills\n• Excellent communication',
-      deadline: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000),
-      categoryId: createdCategories['product'],
-      postedById: admin.id,
+      company: 'Canva',
+      logoFile: 'canva.png',
+      title: 'Lead Designer',
+      location: 'Ontario, Canada',
+      type: 'FULL_TIME',
+      salary: '$80k-100k',
+      description: 'Canva is looking for Lead Engineer to help develop n ...',
+      tags: ['Design', 'Business'],
+      isFeatured: true,
+      categoryName: 'Design',
+    },
+    {
+      company: 'GoDaddy',
+      logoFile: 'godaddy.png',
+      title: 'Brand Designer',
+      location: 'San Fransisco, US',
+      type: 'FULL_TIME',
+      salary: '$60k-75k',
+      description: 'GoDaddy is looking for Brand Designer to help us...',
+      tags: ['Design'],
+      isFeatured: true,
+      categoryName: 'Design',
+    },
+    {
+      company: 'Twitter',
+      logoFile: 'twitter.png',
+      title: 'Frontend Developer',
+      location: 'San Fransisco, US',
+      type: 'FULL_TIME',
+      salary: '$90k-120k',
+      description: 'Twitter is looking for Frontend Developer to help us...',
+      tags: ['Design', 'Engineering'],
+      isFeatured: true,
+      categoryName: 'Engineering',
     },
   ];
 
-  for (const job of jobs) {
-    await prisma.jobPost.create({ data: job });
-  }
-  console.log('✅ Sample jobs created:', jobs.length);
+  const latestJobsData = [
+    {
+      company: 'Nomad',
+      logoFile: 'nomad.png',
+      title: 'Social Media Assistant',
+      location: 'Paris, France',
+      type: 'FULL_TIME',
+      salary: '$25k-30k',
+      description: 'Social Media Assistant role in Paris, France',
+      tags: ['Full-Time', 'Marketing', 'Design'],
+      isFeatured: false,
+      categoryName: 'Marketing',
+    },
+    {
+      company: 'Netlify',
+      logoFile: 'netlify.png',
+      title: 'Social Media Assistant',
+      location: 'Paris, France',
+      type: 'FULL_TIME',
+      salary: '$28k-35k',
+      description: 'Social Media Assistant role in Netlify',
+      tags: ['Full-Time', 'Marketing', 'Design'],
+      isFeatured: false,
+      categoryName: 'Marketing',
+    },
+    {
+      company: 'Dropbox',
+      logoFile: 'dropbox.png',
+      title: 'Brand Designer',
+      location: 'San Fransisco, USA',
+      type: 'FULL_TIME',
+      salary: '$65k-80k',
+      description: 'Dropbox Brand Designer role',
+      tags: ['Full-Time', 'Marketing', 'Design'],
+      isFeatured: false,
+      categoryName: 'Design',
+    },
+    {
+      company: 'Maze',
+      logoFile: 'maze.png',
+      title: 'Brand Designer',
+      location: 'San Fransisco, USA',
+      type: 'FULL_TIME',
+      salary: '$70k-85k',
+      description: 'Maze is looking for a Brand Designer',
+      tags: ['Full-Time', 'Marketing', 'Design'],
+      isFeatured: false,
+      categoryName: 'Design',
+    },
+  ];
 
-  console.log('\n🎉 Database seeding complete!');
-  console.log('📧 Admin login: admin@quickhire.com / Admin@123');
+  const allJobs = [...featuredJobsData, ...latestJobsData];
+
+  console.log('Seeding jobs and uploading logos...');
+  for (const job of allJobs) {
+    const category = categoriesMap[job.categoryName];
+    if (category) {
+      let companyLogo = null;
+      if (fs.existsSync(getLogoPath(job.logoFile))) {
+        companyLogo = await uploadToCloudinary(getLogoPath(job.logoFile), 'logos');
+      }
+
+      await prisma.jobPost.create({
+        data: {
+          title: job.title,
+          company: job.company,
+          companyLogo: companyLogo,
+          location: job.location,
+          type: 'FULL_TIME',
+          salary: job.salary,
+          description: job.description,
+          tags: job.tags,
+          isFeatured: job.isFeatured,
+          categoryId: category.id,
+          postedById: adminUser.id,
+        },
+      });
+    }
+  }
+
+  console.log('Database seeded successfully with Cloudinary URLs!');
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error('❌ Seeding failed:', e);
-    await prisma.$disconnect();
+  .catch((e) => {
+    console.error(e);
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });
+

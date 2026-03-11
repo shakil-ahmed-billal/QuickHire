@@ -15,23 +15,23 @@ export default function Hero() {
         {/* Text Content */}
         <div className="w-full lg:w-[629px] flex flex-col gap-6 text-center lg:text-left pb-12 md:pb-20">
           <div className="relative inline-block">
-            <h1 className="text-5xl md:text-[72px] font-clash font-semibold leading-[1.1] text-brand-dark">
+            <h1 className="text-4xl sm:text-5xl md:text-[72px] font-clash font-semibold leading-[1.1] text-brand-dark">
               Discover <br /> more than <br />
               <span className="text-secondary">5000+ Jobs</span>
             </h1>
-            <div className="absolute left-0 lg:left-0 bottom-2 md:bottom-3 w-[200px] md:w-[455px] h-2 md:h-4 bg-secondary/20 -z-10"></div>
+            <div className="absolute left-0 lg:left-0 bottom-1 sm:bottom-2 md:bottom-3 w-[150px] sm:w-[200px] md:w-[455px] h-2 md:h-4 bg-secondary/20 -z-10"></div>
           </div>
 
-          <p className="text-lg md:text-xl text-brand-gray max-w-[521px] leading-relaxed mx-auto lg:mx-0">
+          <p className="text-base sm:text-lg md:text-xl text-brand-gray max-w-[521px] leading-relaxed mx-auto lg:mx-0">
             Great platform for the job seeker that searching for new career
             heights and passionate about startups.
           </p>
 
           {/* Search Box */}
-          <div className="mt-8 bg-white p-4 shadow-[0px_79px_128px_rgba(192,192,192,0.09)] flex flex-col md:flex-row items-stretch md:items-center gap-0 w-full lg:w-[852px]">
-            <div className="flex-1 flex items-center gap-4 px-4 border-b md:border-b-0 md:border-r border-brand-border py-4">
+          <div className="mt-8 bg-white p-2 md:p-4 shadow-[0px_79px_128px_rgba(192,192,192,0.09)] flex flex-col xl:flex-row items-stretch xl:items-center gap-2 xl:gap-0 w-full xl:w-[852px]">
+            <div className="flex-1 flex items-center gap-4 px-4 border-b xl:border-b-0 xl:border-r border-brand-border py-4 md:py-6 xl:py-4">
               <svg
-                className="w-6 h-6 text-brand-dark shrink-0"
+                className="w-6 h-6 text-primary shrink-0"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -43,13 +43,13 @@ export default function Hero() {
               <input
                 type="text"
                 placeholder="Job title or keyword"
-                className="w-full outline-none text-brand-dark placeholder:text-brand-gray/50 font-medium bg-transparent"
+                className="w-full outline-none text-brand-dark placeholder:text-brand-gray/50 font-medium bg-transparent text-lg"
               />
             </div>
 
-            <div className="flex-1 flex items-center gap-4 px-4 border-b md:border-b-0 border-brand-border py-4">
+            <div className="flex-1 flex items-center gap-4 px-4 border-b xl:border-b-0 border-brand-border py-4 md:py-6 xl:py-4">
               <svg
-                className="w-6 h-6 text-brand-dark shrink-0"
+                className="w-6 h-6 text-primary shrink-0"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -59,7 +59,7 @@ export default function Hero() {
                 <circle cx="12" cy="10" r="3" />
               </svg>
               <div className="flex items-center justify-between w-full cursor-pointer">
-                <span className="text-brand-dark font-medium">
+                <span className="text-brand-dark font-medium text-lg">
                   Florence, Italy
                 </span>
                 <svg
@@ -74,9 +74,11 @@ export default function Hero() {
               </div>
             </div>
 
-            <button className="md:ml-4 px-8 py-4 bg-primary text-white font-bold text-lg hover:bg-primary/95 transition-all shrink-0">
-              Search my job
-            </button>
+            <div className="p-2 xl:pl-4 w-full xl:w-auto">
+              <button className="w-full px-8 py-4 bg-primary text-white font-bold text-lg hover:bg-primary/95 transition-all shrink-0 shadow-lg shadow-primary/20">
+                Search my job
+              </button>
+            </div>
           </div>
 
           <p className="mt-4 text-brand-dark/70 text-sm md:text-base">

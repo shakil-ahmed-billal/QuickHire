@@ -1,3 +1,4 @@
+// Application service updated with applicantId
 import status from 'http-status';
 import AppError from '../../errors/AppError';
 import { prisma } from '../../lib/prisma';
@@ -14,9 +15,9 @@ const submitApplication = async (payload: ICreateApplicationPayload) => {
     throw new AppError(status.BAD_REQUEST, 'Application deadline has passed.');
   }
 
-  // Prevent duplicate application from same email
+  // Prevent duplicate application from same user
   const existing = await prisma.application.findFirst({
-    where: { jobId: payload.jobId, applicantEmail: payload.applicantEmail },
+    where: { jobId: payload.jobId, applicantId: payload.applicantId },
   });
   if (existing) {
     throw new AppError(status.CONFLICT, 'You have already applied for this job.');
@@ -28,6 +29,27 @@ const submitApplication = async (payload: ICreateApplicationPayload) => {
   });
 
   return application;
+};
+
+const getMyApplications = async (userId: string) => {
+  const applications = await prisma.application.findMany({
+    where: { applicantId: userId },
+    include: {
+      job: {
+        select: {
+          id: true,
+          title: true,
+          company: true,
+          companyLogo: true,
+          location: true,
+          type: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  return applications;
 };
 
 const getAllApplications = async (page = 1, limit = 10) => {
@@ -84,6 +106,7 @@ const updateApplicationStatus = async (id: string, appStatus: 'PENDING' | 'REVIE
 
 export const ApplicationService = {
   submitApplication,
+  getMyApplications,
   getAllApplications,
   getApplicationsByJobId,
   updateApplicationStatus,

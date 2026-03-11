@@ -1,0 +1,36 @@
+C:\Shakil Dev\QuickHire\backend\node_modules\.pnpm\@prisma+client@7.4.2_prisma_49b4b128965f74ea9bbd7586bc0c7d7a\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:260
+        throw new PrismaClientInitializationError(
+              ^
+
+PrismaClientInitializationError: `PrismaClient` needs to be constructed with a non-empty, valid `PrismaClientOptions`:
+
+```
+new PrismaClient({
+  ...
+})
+```
+
+or
+
+```
+constructor() {
+  super({ ... });
+}
+```
+          
+    at new t (C:\Shakil Dev\QuickHire\backend\node_modules\.pnpm\@prisma+client@7.4.2_prisma_49b4b128965f74ea9bbd7586bc0c7d7a\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:260:15)
+    at bcrypt (C:\Shakil Dev\QuickHire\backend\prisma\seed.ts:4:16)
+    at Object.<anonymous> (C:\Shakil Dev\QuickHire\backend\prisma\seed.ts:283:4)
+    at Module._compile (node:internal/modules/cjs/loader:1760:14)
+    at Object.transformer (C:\Shakil Dev\QuickHire\backend\node_modules\.pnpm\tsx@4.21.0\node_modules\tsx\dist\register-D46fvsV_.cjs:3:1104)
+    at Module.load (node:internal/modules/cjs/loader:1480:32)
+    at Module._load (node:internal/modules/cjs/loader:1299:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:244:24)
+    at cjsLoader (node:internal/modules/esm/translators:342:5) {
+  clientVersion: '7.4.2',
+  errorCode: undefined,
+  retryable: undefined
+}
+
+Node.js v24.11.0

@@ -6,8 +6,11 @@ import { createApplicationZodSchema, updateApplicationStatusZodSchema } from './
 
 const router = Router();
 
-// Public - submit application
-router.post('/', validateRequest(createApplicationZodSchema), ApplicationController.submitApplication);
+// Public - submit application (Changed to authenticated to track applicantId)
+router.post('/', checkAuth('JOB_SEEKER', 'ADMIN'), validateRequest(createApplicationZodSchema), ApplicationController.submitApplication);
+
+// User dashboard route
+router.get('/my-applications', checkAuth('JOB_SEEKER', 'ADMIN'), ApplicationController.getMyApplications);
 
 // Admin only routes
 router.get('/', checkAuth('ADMIN'), ApplicationController.getAllApplications);

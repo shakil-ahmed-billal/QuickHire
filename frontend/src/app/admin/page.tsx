@@ -91,7 +91,7 @@ export default function AdminDashboardPage() {
   if (isLoading || !user) return <div className="p-20 text-center">Loading Admin Panel...</div>;
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="w-full py-20 px-6 md:px-[124px] bg-white min-h-screen">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
@@ -148,94 +148,98 @@ export default function AdminDashboardPage() {
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 md:p-6 overflow-x-auto">
           {activeTab === 'jobs' && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Job Title</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Posted</TableHead>
-                  <TableHead>Applicants</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {jobs.map(job => (
-                  <TableRow key={job.id}>
-                    <TableCell className="font-medium">{job.title}</TableCell>
-                    <TableCell>{job.company}</TableCell>
-                    <TableCell><Badge variant="outline">{job.type}</Badge></TableCell>
-                    <TableCell>{new Date(job.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell>{job._count?.applications || 0}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" onClick={() => { setEditingJob(job); setIsJobFormOpen(true); }}>Edit</Button>
-                      <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10" onClick={() => handleDeleteJob(job.id)}>Delete</Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {jobs.length === 0 && (
+            <div className="min-w-[800px]">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">No jobs found.</TableCell>
+                    <TableHead>Job Title</TableHead>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Posted</TableHead>
+                    <TableHead>Applicants</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {jobs.map(job => (
+                    <TableRow key={job.id}>
+                      <TableCell className="font-medium">{job.title}</TableCell>
+                      <TableCell>{job.company}</TableCell>
+                      <TableCell><Badge variant="outline">{job.type}</Badge></TableCell>
+                      <TableCell>{new Date(job.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell>{job._count?.applications || 0}</TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="sm" onClick={() => { setEditingJob(job); setIsJobFormOpen(true); }}>Edit</Button>
+                        <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10" onClick={() => handleDeleteJob(job.id)}>Delete</Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {jobs.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="h-24 text-center">No jobs found.</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           )}
 
           {activeTab === 'applications' && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Applicant</TableHead>
-                  <TableHead>Applied For</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Resume</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {applications.map(app => (
-                  <TableRow key={app.id}>
-                    <TableCell>
-                      <div className="font-medium">{app.applicantName}</div>
-                      <div className="text-xs text-muted-foreground">{app.applicantEmail}</div>
-                    </TableCell>
-                    <TableCell>{app.job.title} <span className="text-xs text-muted-foreground">({app.job.company})</span></TableCell>
-                    <TableCell>{new Date(app.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      {app.resumeUrl ? (
-                        <a href={app.resumeUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline text-sm">View Link</a>
-                      ) : (
-                        <span className="text-muted-foreground text-sm">None</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Select 
-                        value={app.status} 
-                        onValueChange={(val) => handleUpdateAppStatus(app.id, val || app.status)}
-                      >
-                        <SelectTrigger className="w-[140px] h-8 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="PENDING">Pending</SelectItem>
-                          <SelectItem value="REVIEWED">Reviewed</SelectItem>
-                          <SelectItem value="SHORTLISTED">Shortlisted</SelectItem>
-                          <SelectItem value="REJECTED">Rejected</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {applications.length === 0 && (
+            <div className="min-w-[900px]">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">No applications found.</TableCell>
+                    <TableHead>Applicant</TableHead>
+                    <TableHead>Applied For</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Resume</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {applications.map(app => (
+                    <TableRow key={app.id}>
+                      <TableCell>
+                        <div className="font-medium">{app.applicantName}</div>
+                        <div className="text-xs text-muted-foreground">{app.applicantEmail}</div>
+                      </TableCell>
+                      <TableCell>{app.job.title} <span className="text-xs text-muted-foreground">({app.job.company})</span></TableCell>
+                      <TableCell>{new Date(app.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell>
+                        {app.resumeUrl ? (
+                          <a href={app.resumeUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline text-sm">View Link</a>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">None</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Select 
+                          value={app.status} 
+                          onValueChange={(val) => handleUpdateAppStatus(app.id, val || app.status)}
+                        >
+                          <SelectTrigger className="w-[140px] h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="PENDING">Pending</SelectItem>
+                            <SelectItem value="REVIEWED">Reviewed</SelectItem>
+                            <SelectItem value="SHORTLISTED">Shortlisted</SelectItem>
+                            <SelectItem value="REJECTED">Rejected</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {applications.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="h-24 text-center">No applications found.</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </div>
       </div>

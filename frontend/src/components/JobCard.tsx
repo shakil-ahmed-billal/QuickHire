@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Building2, MapPin, Clock, DollarSign } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -44,11 +45,20 @@ export function JobCard({ job }: { job: Job }) {
     <Card className="group hover:border-primary/50 transition-all hover:shadow-md flex flex-col h-full">
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12  bg-muted flex items-center justify-center font-bold text-xl text-muted-foreground border">
-            {job.company.charAt(0)}
+          <div className="h-12 w-12  bg-muted flex items-center justify-center font-bold text-xl text-muted-foreground border relative overflow-hidden">
+            {job.companyLogo ? (
+              <Image 
+                src={job.companyLogo} 
+                alt={job.company} 
+                fill 
+                className="object-contain p-1"
+              />
+            ) : (
+              job.company.charAt(0)
+            )}
           </div>
           <div>
-            <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
+            <h3 className="font-semibold text-base md:text-lg line-clamp-1 group-hover:text-primary transition-colors">
               <Link href={`/jobs/${job.id}`}>
                 {job.title}
               </Link>

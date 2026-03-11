@@ -4,6 +4,7 @@ import { IJobQueryParams } from './job.interface';
 import { catchAsync } from '../../shared/catchAsync';
 import { sendResponse } from '../../shared/sendResponse';
 import { JobService } from './job.service';
+import { cloudinary } from '../../config/cloudinary';
 
 const getAllJobs = catchAsync(async (req: Request, res: Response) => {
   const query = req.query as IJobQueryParams;
@@ -32,26 +33,52 @@ const getJobById = catchAsync(async (req: Request, res: Response) => {
 
 const createJob = catchAsync(async (req: Request, res: Response) => {
   const postedById = req.user!.userId;
-  const result = await JobService.createJob(req.body, postedById);
+  const payload = req.body;
 
-  sendResponse(res, {
-    httpStatusCode: status.CREATED,
-    success: true,
-    message: 'Job created successfully',
-    data: result,
-  });
+  if (req.file) {
+    payload.companyLogo = req.file.path;
+  }
+
+  try {
+    const result = await JobService.createJob(payload, postedById);
+
+    sendResponse(res, {
+      httpStatusCode: status.CREATED,
+      success: true,
+      message: 'Job created successfully',
+      data: result,
+    });
+  } catch (error) {
+    if (req.file && (req.file as any).filename) {
+      await cloudinary.uploader.destroy((req.file as any).filename);
+    }
+    throw error;
+  }
 });
 
 const updateJob = catchAsync(async (req: Request, res: Response) => {
   const id = req.params['id'] as string;
-  const result = await JobService.updateJob(id, req.body);
+  const payload = req.body;
 
-  sendResponse(res, {
-    httpStatusCode: status.OK,
-    success: true,
-    message: 'Job updated successfully',
-    data: result,
-  });
+  if (req.file) {
+    payload.companyLogo = req.file.path;
+  }
+
+  try {
+    const result = await JobService.updateJob(id, payload);
+
+    sendResponse(res, {
+      httpStatusCode: status.OK,
+      success: true,
+      message: 'Job updated successfully',
+      data: result,
+    });
+  } catch (error) {
+    if (req.file && (req.file as any).filename) {
+      await cloudinary.uploader.destroy((req.file as any).filename);
+    }
+    throw error;
+  }
 });
 
 const deleteJob = catchAsync(async (req: Request, res: Response) => {

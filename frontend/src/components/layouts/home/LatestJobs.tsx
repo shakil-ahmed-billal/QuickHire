@@ -1,5 +1,9 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import api from "@/lib/axios";
 
 interface Job {
   id: string;
@@ -7,86 +11,48 @@ interface Job {
   company: string;
   location: string;
   type: string;
-  logo: string;
+  companyLogo: string;
   tags: string[];
 }
 
-const jobs: Job[] = [
-  {
-    id: "1",
-    title: "Social Media Assistant",
-    company: "Nomad",
-    location: "Paris, France",
-    type: "Full-Time",
-    logo: "/assets/logos/nomad.png",
-    tags: ["Full-Time", "Marketing", "Design"],
-  },
-  {
-    id: "2",
-    title: "Social Media Assistant",
-    company: "Netlify",
-    location: "Paris, France",
-    type: "Full-Time",
-    logo: "/assets/logos/netlify.png",
-    tags: ["Full-Time", "Marketing", "Design"],
-  },
-  {
-    id: "3",
-    title: "Brand Designer",
-    company: "Dropbox",
-    location: "San Fransisco, USA",
-    type: "Full-Time",
-    logo: "/assets/logos/dropbox.png",
-    tags: ["Full-Time", "Marketing", "Design"],
-  },
-  {
-    id: "4",
-    title: "Brand Designer",
-    company: "Maze",
-    location: "San Fransisco, USA",
-    type: "Full-Time",
-    logo: "/assets/logos/maze.png",
-    tags: ["Full-Time", "Marketing", "Design"],
-  },
-  {
-    id: "5",
-    title: "Interactive Developer",
-    company: "Terraform",
-    location: "Hamburg, Germany",
-    type: "Full-Time",
-    logo: "/assets/logos/terraform.png",
-    tags: ["Full-Time", "Marketing", "Design"],
-  },
-  {
-    id: "6",
-    title: "Interactive Developer",
-    company: "Udacity",
-    location: "Hamburg, Germany",
-    type: "Full-Time",
-    logo: "/assets/logos/udacity.png",
-    tags: ["Full-Time", "Marketing", "Design"],
-  },
-  {
-    id: "7",
-    title: "HR Manager",
-    company: "Packer",
-    location: "Lucern, Switzerland",
-    type: "Full-Time",
-    logo: "/assets/logos/packer.png",
-    tags: ["Full-Time", "Marketing", "Design"],
-  },
-  {
-    id: "8",
-    title: "HR Manager",
-    company: "Webflow",
-    location: "Lucern, Switzerland",
-    type: "Full-Time",
-    logo: "/assets/logos/webflow.png",
-    tags: ["Full-Time", "Marketing", "Design"],
-  },
-];
-
 export default function LatestJobs() {
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLatestJobs = async () => {
+      try {
+        const response = await api.get("/jobs?sortBy=createdAt&sortOrder=desc&limit=8");
+        if (response.data.success) {
+          setJobs(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching latest jobs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLatestJobs();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="relative w-full py-20 bg-brand-light overflow-hidden px-6 md:px-[124px]">
+        <div className="container mx-auto relative z-10">
+          <div className="animate-pulse flex flex-col gap-12">
+            <div className="h-12 bg-gray-200 w-1/3 rounded"></div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-40 bg-white border border-gray-200"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="relative w-full py-20 bg-brand-light overflow-hidden px-6 md:px-[124px]">
       {/* Decorative Background Elements */}
@@ -117,13 +83,14 @@ export default function LatestJobs() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {jobs.map((job) => (
-            <div
+            <Link
               key={job.id}
+              href={`/jobs/${job.id}`}
               className="bg-white p-6 md:p-10 flex gap-6 items-start hover:shadow-xl transition-shadow cursor-pointer border border-transparent hover:border-brand-border"
             >
               <div className="relative w-16 h-16 flex-shrink-0">
                 <Image
-                  src={job.logo}
+                  src={job.companyLogo || "/assets/logos/placeholder.png"}
                   alt={job.company}
                   fill
                   className="object-contain"
@@ -143,24 +110,25 @@ export default function LatestJobs() {
                     <span
                       key={index}
                       className={`px-3 py-1 text-sm font-semibold  ${
-                        tag === "Full-Time"
+                        tag === "Full-Time" || tag === "FULL_TIME"
                           ? "bg-green-50 text-[#56CDAD]"
                           : tag === "Marketing"
                           ? "border border-[#FFB836] text-[#FFB836]"
                           : tag === "Design"
                           ? "border border-primary text-primary"
-                          : ""
+                          : "bg-gray-50 text-gray-500"
                       }`}
                     >
-                      {tag}
+                      {tag.replace("_", " ")}
                     </span>
                   ))}
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
     </section>
   );
 }
+

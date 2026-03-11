@@ -12,9 +12,9 @@ export default function Home() {
         <Hero />
         <TrustedCompanies />
         <CategorySection />
+        <PostJobCTA />
         <FeaturedJobs />
         <LatestJobs />
-        <PostJobCTA />
       </main>
     </div>
   );

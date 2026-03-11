@@ -18,6 +18,7 @@ interface AdminJobFormProps {
 export function AdminJobForm({ onSuccess, onCancel, initialData }: AdminJobFormProps) {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
   const isEditing = !!initialData;
 
   const [formData, setFormData] = useState({
@@ -44,16 +45,34 @@ export function AdminJobForm({ onSuccess, onCancel, initialData }: AdminJobFormP
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setLogoFile(e.target.files[0]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
+    const data = new FormData();
+    data.append('data', JSON.stringify(formData));
+    if (logoFile) {
+      data.append('companyLogo', logoFile);
+    }
+
     try {
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      };
+
       if (isEditing) {
-        await api.patch(`/jobs/${initialData.id}`, formData);
+        await api.patch(`/jobs/${initialData.id}`, data, config);
         toast.success('Job updated successfully');
       } else {
-        await api.post('/jobs', formData);
+        await api.post('/jobs', data, config);
         toast.success('Job created successfully');
       }
       if (onSuccess) onSuccess();
@@ -88,6 +107,13 @@ export function AdminJobForm({ onSuccess, onCancel, initialData }: AdminJobFormP
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
+          <Label htmlFor="logo">Company Logo</Label>
+          <Input id="logo" type="file" accept="image/*" onChange={handleFileChange} />
+          {initialData?.companyLogo && !logoFile && (
+            <p className="text-xs text-muted-foreground">Current logo: {initialData.companyLogo.split('/').pop()}</p>
+          )}
+        </div>
+        <div className="space-y-2">
           <Label>Category</Label>
           <Select value={formData.categoryId} onValueChange={(val) => setFormData(p => ({...p, categoryId: val || ''}))}>
             <SelectTrigger>
@@ -100,6 +126,9 @@ export function AdminJobForm({ onSuccess, onCancel, initialData }: AdminJobFormP
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Job Type</Label>
           <Select value={formData.type} onValueChange={(val) => setFormData(p => ({...p, type: val || 'FULL_TIME'}))}>
@@ -115,13 +144,13 @@ export function AdminJobForm({ onSuccess, onCancel, initialData }: AdminJobFormP
             </SelectContent>
           </Select>
         </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="salary">Salary (Optional)</Label>
           <Input id="salary" name="salary" placeholder="e.g. $80k - $100k" value={formData.salary} onChange={handleChange} />
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
         <div className="space-y-2">
           <Label htmlFor="deadline">Deadline (Optional)</Label>
           <Input id="deadline" name="deadline" type="date" value={formData.deadline} onChange={handleChange} />

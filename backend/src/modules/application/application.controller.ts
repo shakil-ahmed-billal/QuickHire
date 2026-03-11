@@ -5,12 +5,25 @@ import { sendResponse } from '../../shared/sendResponse';
 import { ApplicationService } from './application.service';
 
 const submitApplication = catchAsync(async (req: Request, res: Response) => {
-  const result = await ApplicationService.submitApplication(req.body);
+  const applicantId = req.user!.userId;
+  const result = await ApplicationService.submitApplication({ ...req.body, applicantId });
 
   sendResponse(res, {
     httpStatusCode: status.CREATED,
     success: true,
     message: 'Application submitted successfully!',
+    data: result,
+  });
+});
+
+const getMyApplications = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user!.userId;
+  const result = await ApplicationService.getMyApplications(userId);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: 'Your applications fetched successfully',
     data: result,
   });
 });
@@ -56,6 +69,7 @@ const updateApplicationStatus = catchAsync(async (req: Request, res: Response) =
 
 export const ApplicationController = {
   submitApplication,
+  getMyApplications,
   getAllApplications,
   getApplicationsByJobId,
   updateApplicationStatus,

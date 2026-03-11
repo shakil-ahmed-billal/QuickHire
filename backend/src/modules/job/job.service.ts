@@ -14,7 +14,7 @@ const jobInclude = {
 };
 
 const getAllJobs = async (query: IJobQueryParams) => {
-  const { search, category, location, type, page = '1', limit = '9', sortBy = 'createdAt', sortOrder = 'desc' } = query;
+  const { search, category, location, type, isFeatured, page = '1', limit = '9', sortBy = 'createdAt', sortOrder = 'desc' } = query;
 
   const pageNum = parseInt(page);
   const limitNum = parseInt(limit);
@@ -26,6 +26,7 @@ const getAllJobs = async (query: IJobQueryParams) => {
     category?: { slug: string };
     location?: { contains: string; mode: 'insensitive' };
     type?: JobType;
+    isFeatured?: boolean;
   } = { isDeleted: false };
 
   if (search) {
@@ -39,6 +40,8 @@ const getAllJobs = async (query: IJobQueryParams) => {
   if (category) whereConditions.category = { slug: category };
   if (location) whereConditions.location = { contains: location, mode: 'insensitive' };
   if (type) whereConditions.type = type as JobType;
+  if (isFeatured === 'true') whereConditions.isFeatured = true;
+  if (isFeatured === 'false') whereConditions.isFeatured = false;
 
   const [jobs, total] = await Promise.all([
     prisma.jobPost.findMany({

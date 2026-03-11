@@ -7,6 +7,8 @@ export interface ICreateJobPayload {
   salary?: string;
   description: string;
   requirements?: string;
+  tags?: string[];
+  isFeatured?: boolean;
   deadline?: string;
   categoryId: string;
 }
@@ -16,6 +18,7 @@ export interface IJobQueryParams {
   category?: string;
   location?: string;
   type?: string;
+  isFeatured?: string;
   page?: string;
   limit?: string;
   sortBy?: string;

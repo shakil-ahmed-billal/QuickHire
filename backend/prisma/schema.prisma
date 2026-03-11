@@ -37,6 +37,7 @@ model User {
   updatedAt    DateTime  @updatedAt
 
   jobPosts     JobPost[]
+  applications Application[]
 }
 
 model Category {
@@ -59,6 +60,8 @@ model JobPost {
   salary       String?
   description  String
   requirements String?
+  tags         String[]  @default([])
+  isFeatured   Boolean   @default(false)
   deadline     DateTime?
   isDeleted    Boolean   @default(false)
   createdAt    DateTime  @default(now())
@@ -85,4 +88,9 @@ model Application {
 
   jobId          String
   job            JobPost           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  applicantId    String
+  applicant      User              @relation(fields: [applicantId], references: [id])
+
+  @@unique([jobId, applicantId])
 }

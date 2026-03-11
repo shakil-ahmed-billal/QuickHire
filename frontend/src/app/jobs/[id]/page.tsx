@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import NextImage from 'next/image';
 import { ArrowLeft, Building2, MapPin, Clock, DollarSign, Calendar, Briefcase } from 'lucide-react';
 import api from '@/lib/axios';
 import { Job } from '@/components/JobCard';
@@ -28,22 +29,34 @@ export default function JobDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isApplyOpen, setIsApplyOpen] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
 
   useEffect(() => {
     if (!id) return;
 
-    api.get(`/jobs/${id}`)
-      .then(res => {
-        if(res.data.success) {
-          setJob(res.data.data);
+    const loadData = async () => {
+      try {
+        const [jobRes, appsRes] = await Promise.all([
+          api.get(`/jobs/${id}`),
+          api.get('/applications/my-applications').catch(() => ({ data: { success: false } }))
+        ]);
+
+        if (jobRes.data.success) {
+          setJob(jobRes.data.data);
         }
-      })
-      .catch(err => {
+
+        if (appsRes.data.success) {
+          const applied = appsRes.data.data.some((app: any) => app.job.id === id);
+          setHasApplied(applied);
+        }
+      } catch (err: any) {
         setError(err.message || 'Failed to load job details');
-      })
-      .finally(() => {
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    loadData();
   }, [id]);
 
   if (loading) {
@@ -74,108 +87,142 @@ export default function JobDetailPage() {
 
   return (
     <div className="bg-muted/10 min-h-screen pb-20">
-      <div className="bg-background border-b">
-        <div className="container mx-auto px-4 py-8 max-w-5xl">
+      <div className="bg-background border-b px-6 md:px-[124px]">
+        <div className="container mx-auto py-8">
           <Button variant="ghost" className="mb-6 -ml-4 text-muted-foreground" onClick={() => router.back()}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Back
           </Button>
           
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-            <div className="flex items-start gap-6">
-              <div className="h-20 w-20  bg-muted flex items-center justify-center font-bold text-3xl text-muted-foreground border shadow-sm">
-                {job.company.charAt(0)}
+          <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-8">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
+              <div className="h-24 w-24 md:h-32 md:w-32 bg-white flex items-center justify-center font-bold text-3xl text-muted-foreground border shadow-sm relative overflow-hidden">
+                {job.companyLogo ? (
+                  <NextImage 
+                    src={job.companyLogo} 
+                    alt={job.company} 
+                    fill 
+                    className="object-contain p-3"
+                  />
+                ) : (
+                  job.company.charAt(0)
+                )}
               </div>
-              <div>
-                <h1 className="text-3xl font-bold mb-2">{job.title}</h1>
-                <div className="flex items-center gap-2 text-xl text-muted-foreground mb-4">
-                  <Building2 className="h-5 w-5" />
-                  <span className="font-medium">{job.company}</span>
+              <div className="space-y-4">
+                <h1 className="text-3xl md:text-5xl font-clash font-semibold text-brand-dark">{job.title}</h1>
+                <div className="flex flex-wrap justify-center sm:justify-start items-center gap-6 text-lg md:text-xl text-brand-gray">
+                  <span className="flex items-center gap-2">
+                    <Building2 className="h-6 w-6" />
+                    {job.company}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <MapPin className="h-6 w-6" />
+                    {job.location}
+                  </span>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary">{typeMap[job.type]}</Badge>
-                  <Badge variant="outline">{job.category.name}</Badge>
+                <div className="flex flex-wrap justify-center sm:justify-start gap-3">
+                  <Badge variant="secondary" className="px-4 py-1 text-base">{typeMap[job.type]}</Badge>
+                  <Badge variant="outline" className="px-4 py-1 text-base">{job.category.name}</Badge>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 min-w-[200px]">
+            <div className="flex flex-col gap-4 min-w-[200px] w-full xl:w-auto">
                <Dialog open={isApplyOpen} onOpenChange={setIsApplyOpen}>
-                <Button size="lg" className="w-full text-lg h-12 shadow-md" onClick={() => setIsApplyOpen(true)}>
-                  Apply Now
+                <Button 
+                  size="lg" 
+                  className={`w-full text-xl h-14 md:h-16 shadow-lg shadow-primary/20 ${hasApplied ? 'bg-green-600 hover:bg-green-600' : ''}`} 
+                  onClick={() => !hasApplied && setIsApplyOpen(true)}
+                  disabled={hasApplied}
+                >
+                  {hasApplied ? 'Applied' : 'Apply Now'}
                 </Button>
                 <DialogContent className="sm:max-w-[500px]">
                   <DialogHeader>
-                    <DialogTitle>Apply for {job.title}</DialogTitle>
-                    <DialogDescription>
+                    <DialogTitle className="text-2xl">Apply for {job.title}</DialogTitle>
+                    <DialogDescription className="text-lg">
                       Submit your application to {job.company}.
                     </DialogDescription>
                   </DialogHeader>
                   <ApplyForm 
                     jobId={job.id} 
-                    onSuccess={() => setIsApplyOpen(false)} 
+                    onSuccess={() => {
+                      setIsApplyOpen(false);
+                      setHasApplied(true);
+                    }} 
                     onCancel={() => setIsApplyOpen(false)} 
                   />
                 </DialogContent>
               </Dialog>
-              <p className="text-sm text-center text-muted-foreground">
-                Posted {timeDisplay}
-              </p>
+              <div className="flex items-center justify-center gap-2 text-brand-gray">
+                <Clock className="h-5 w-5" />
+                <span>Posted {timeDisplay}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12 max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2 space-y-10">
-          <section>
-            <h2 className="text-2xl font-bold mb-4">Job Description</h2>
-            <div className="prose prose-gray dark:prose-invert max-w-none text-muted-foreground whitespace-pre-wrap leading-relaxed">
-              {job.description}
-            </div>
-          </section>
-
-          {job.requirements && (
+      <div className="px-6 md:px-[124px] py-12">
+        <div className="container mx-auto grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="lg:col-span-2 space-y-12">
             <section>
-              <h2 className="text-2xl font-bold mb-4">Requirements</h2>
-              <div className="prose prose-gray dark:prose-invert max-w-none text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                {job.requirements}
+              <h2 className="text-2xl md:text-3xl font-clash font-semibold text-brand-dark mb-6">Job Description</h2>
+              <div className="prose prose-base md:prose-lg prose-gray max-w-none text-brand-gray whitespace-pre-wrap leading-relaxed">
+                {job.description}
               </div>
             </section>
-          )}
-        </div>
 
-        <div className="space-y-6">
-          <div className=" border bg-card text-card-foreground shadow-sm p-6">
-            <h3 className="font-semibold text-lg mb-4 border-b pb-2">Job Overview</h3>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium text-sm">Location</p>
-                  <p className="text-muted-foreground text-sm">{job.location}</p>
+            {job.requirements && (
+              <section>
+                <h2 className="text-2xl md:text-3xl font-clash font-semibold text-brand-dark mb-6">Requirements</h2>
+                <div className="prose prose-base md:prose-lg prose-gray max-w-none text-brand-gray whitespace-pre-wrap leading-relaxed">
+                  {job.requirements}
                 </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Briefcase className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium text-sm">Job Type</p>
-                  <p className="text-muted-foreground text-sm">{typeMap[job.type]}</p>
-                </div>
-              </div>
-              {job.salary && (
-                <div className="flex items-start gap-3">
-                  <DollarSign className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+              </section>
+            )}
+          </div>
+
+          <div className="space-y-6">
+            <div className="p-8 border border-brand-border bg-white shadow-sm flex flex-col gap-8">
+              <h3 className="text-2xl font-clash font-semibold text-brand-dark border-b border-brand-border pb-4">Job Overview</h3>
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center text-primary shrink-0">
+                    <MapPin className="h-6 w-6" />
+                  </div>
                   <div>
-                    <p className="font-medium text-sm">Salary</p>
-                    <p className="text-muted-foreground text-sm">{job.salary}</p>
+                    <p className="font-medium text-lg text-brand-dark">Location</p>
+                    <p className="text-brand-gray">{job.location}</p>
                   </div>
                 </div>
-              )}
-              <div className="flex items-start gap-3">
-                <Calendar className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium text-sm">Date Posted</p>
-                  <p className="text-muted-foreground text-sm">{new Date(job.createdAt).toLocaleDateString()}</p>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center text-primary shrink-0">
+                    <Briefcase className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-lg text-brand-dark">Job Type</p>
+                    <p className="text-brand-gray">{typeMap[job.type]}</p>
+                  </div>
+                </div>
+                {job.salary && (
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center text-primary shrink-0">
+                      <DollarSign className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-lg text-brand-dark">Salary</p>
+                      <p className="text-brand-gray">{job.salary}</p>
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center text-primary shrink-0">
+                    <Calendar className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-lg text-brand-dark">Date Posted</p>
+                    <p className="text-brand-gray">{new Date(job.createdAt).toLocaleDateString()}</p>
+                  </div>
                 </div>
               </div>
             </div>

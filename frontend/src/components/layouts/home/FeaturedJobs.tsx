@@ -1,83 +1,58 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import api from "@/lib/axios";
+
+interface Job {
+  id: string;
+  company: string;
+  companyLogo: string;
+  title: string;
+  location: string;
+  type: string;
+  description: string;
+  tags: string[];
+}
 
 export default function FeaturedJobs() {
-  const jobs = [
-    {
-      company: "Revolut",
-      logo: "/assets/logos/revolut.png",
-      title: "Email Marketing",
-      location: "Madrid, Spain",
-      type: "Full Time",
-      description: "Revolut is looking for Email Marketing to help team ma ...",
-      tags: ["Marketing", "Design"],
-    },
-    {
-      company: "Dropbox",
-      logo: "/assets/logos/dropbox.png",
-      title: "Brand Designer",
-      location: "San Fransisco, US",
-      type: "Full Time",
-      description:
-        "Dropbox is looking for Brand Designer to help the team t ...",
-      tags: ["Design", "Business"],
-    },
-    {
-      company: "Pitch",
-      logo: "/assets/logos/pitch.png",
-      title: "Email Marketing",
-      location: "Berlin, Germany",
-      type: "Full Time",
-      description:
-        "Pitch is looking for Customer Manager to join marketing t ...",
-      tags: ["Marketing"],
-    },
-    {
-      company: "Blinkist",
-      logo: "/assets/logos/blinkist.png",
-      title: "Visual Designer",
-      location: "Granada, Spain",
-      type: "Full Time",
-      description:
-        "Blinkist is looking for Visual Designer to help team desi ...",
-      tags: ["Design"],
-    },
-    {
-      company: "ClassPass",
-      logo: "/assets/logos/classpass.png",
-      title: "Product Designer",
-      location: "Manchester, UK",
-      type: "Full Time",
-      description: "ClassPass is looking for Product Designer to help us...",
-      tags: ["Marketing", "Design"],
-    },
-    {
-      company: "Canva",
-      logo: "/assets/logos/canva.png",
-      title: "Lead Designer",
-      location: "Ontario, Canada",
-      type: "Full Time",
-      description: "Canva is looking for Lead Engineer to help develop n ...",
-      tags: ["Design", "Business"],
-    },
-    {
-      company: "GoDaddy",
-      logo: "/assets/logos/godaddy.png",
-      title: "Brand Designer",
-      location: "San Fransisco, US",
-      type: "Full Time",
-      description: "GoDaddy is looking for Brand Designer to help us...",
-      tags: ["Design"],
-    },
-    {
-      company: "Twitter",
-      logo: "/assets/logos/twitter.png",
-      title: "Frontend Developer",
-      location: "San Fransisco, US",
-      type: "Full Time",
-      description: "Twitter is looking for Frontend Developer to help us...",
-      tags: ["Design", "Engineering"],
-    },
-  ];
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeaturedJobs = async () => {
+      try {
+        const response = await api.get("/jobs?isFeatured=true&limit=8");
+        if (response.data.success) {
+          setJobs(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching featured jobs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeaturedJobs();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="w-full py-20 px-6 md:px-[124px] bg-white">
+        <div className="container mx-auto">
+          <div className="animate-pulse flex flex-col gap-12">
+            <div className="h-12 bg-gray-200 w-1/3 rounded"></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-80 bg-gray-100 border border-gray-200"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="w-full py-20 px-6 md:px-[124px] bg-white">
@@ -101,15 +76,16 @@ export default function FeaturedJobs() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {jobs.map((job, index) => (
-            <div
-              key={index}
+          {jobs.map((job) => (
+            <Link
+              key={job.id}
+              href={`/jobs/${job.id}`}
               className="p-8 border border-brand-border hover:border-primary/50 transition-all cursor-pointer flex flex-col gap-6 group hover:shadow-[0px_48px_80px_rgba(192,192,192,0.1)]"
             >
               <div className="flex justify-between items-start">
                 <div className="relative w-12 h-12 flex items-center justify-center">
                   <Image
-                    src={job.logo}
+                    src={job.companyLogo || "/assets/logos/placeholder.png"}
                     alt={job.company}
                     width={48}
                     height={48}
@@ -117,7 +93,7 @@ export default function FeaturedJobs() {
                   />
                 </div>
                 <div className="px-3 py-1 border border-primary text-primary text-sm font-medium">
-                  {job.type}
+                  {job.type.replace("_", " ")}
                 </div>
               </div>
 
@@ -152,10 +128,11 @@ export default function FeaturedJobs() {
                   </span>
                 ))}
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
     </section>
   );
 }
+
