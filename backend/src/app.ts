@@ -9,6 +9,7 @@ import morgan from 'morgan';
 
 const app: Application = express();
 
+app.set('trust proxy', 1); // Trust first proxy (like Vercel) for secure cookies
 // CORS
 app.use(
   cors({
